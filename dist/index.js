@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Controller_1 = require("./Controller");
+const Controller_1 = require("./controller/Controller");
 exports.Controller = Controller_1.Controller;
-var Router_1 = require("./Router");
+const Router_1 = require("./router/Router");
 exports.Router = Router_1.Router;
-var Resource_1 = require("./Resource");
-exports.Resource = Resource_1.Resource;
-var Serializer_1 = require("./Serializer");
+const Action_1 = require("./router/Action");
+exports.Action = Action_1.Action;
+const Serializer_1 = require("./controller/Serializer");
 exports.Serializer = Serializer_1.Serializer;
+const Error_1 = require("./controller/Error");
+exports.Error = Error_1.Error;
