@@ -190,8 +190,8 @@ export class Router {
   get toJson() {
     const actions: any[] = []
     this.forEachAction(action => {
-      const { url, as, errors } = action
-      actions.push({ url, as, errors })
+      const { url, as, errors, parameterFields } = action
+      actions.push({ url, as, errors, parameterFields })
     })
     return actions
   }

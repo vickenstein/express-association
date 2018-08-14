@@ -15,7 +15,26 @@ describe('UserPurchase', () => {
         message: 'There was an error',
         status: 404
       })
-
+    })
+    it('caught an invalid error', async () => {
+      const response = await request.get('/test/users/1337/user_purchases/1337?test=test')
+      expect(response.body).to.deep.equal({
+        type: 'ParameterValidationError',
+        message: [
+          {
+            context: {
+              key: "test",
+              label: "test"
+            },
+            message: "\"test\" is not allowed",
+            path: [
+              "test"
+            ],
+            type: "any.unknown"
+          }
+        ],
+        status: 422
+      })
     })
   })
 })

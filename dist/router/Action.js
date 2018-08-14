@@ -67,7 +67,7 @@ class Action {
         try {
             Controller = require(Path.join(Action.controllerPath, this.controller + 'Controller'));
         }
-        catch (_a) {
+        catch (error) {
             try {
                 Controller = require(Path.join(Action.controllerPath, this.controller));
             }
@@ -84,7 +84,29 @@ class Action {
         throw 'the imported controller does not seem to be an controller';
     }
     get errors() {
-        return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => error.name).join(', ');
+        return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');
+    }
+    get parameterFields() {
+        const parameterFields = [];
+        Object.keys(this._parameters).forEach(key => {
+            const validator = this._parameters[key];
+            const type = validator.type;
+            const presence = validator.flags && validator.flags.presence;
+            if (presence === 'forbidden')
+                return;
+            parameterFields.push(`${key}: ${type}${presence === 'required' ? ' - required' : ''}`);
+        });
+        return parameterFields.join(', ');
+    }
+    get _parameters() {
+        const parameters = {};
+        Controller_1.Controller.filter(this.Controller.inheritedParameters, this.action).forEach(([[key, validator], options]) => {
+            parameters[key] = validator.describe();
+        });
+        return parameters;
+    }
+    get parameters() {
+        return JSON.stringify(this._parameters);
     }
     launchOn(application) {
         application[this.protocol](this.url, ...this.Controller.middlewares(this.action));

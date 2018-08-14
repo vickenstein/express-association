@@ -1,3 +1,4 @@
+const Joi = require('joi')
 const ApiController = require('./ApiController')
 
 class UserController extends ApiController {
@@ -45,5 +46,7 @@ class UserController extends ApiController {
 }
 
 UserController.before('token')
+
+UserController.parameter('test', Joi.string().required(), { only: ['create', 'update'] })
 
 module.exports = UserController

@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const Joi = require("joi");
 const _ = require("lodash");
+const ParameterValidationError_1 = require("./ParameterValidationError");
 class Controller {
     constructor(request, response) {
         this.request = request;
@@ -21,35 +23,52 @@ class Controller {
             status: error.status
         });
     }
+    static parameterValidationFunction(parameters) {
+        const JoiSchema = {};
+        parameters.forEach(([[key, validator], options]) => {
+            JoiSchema[key] = validator;
+        });
+        const schema = Joi.object(JoiSchema);
+        return (parameters) => {
+            const result = schema.validate(parameters);
+            if (result.error)
+                throw new ParameterValidationError_1.ParameterValidationError(result.error.details, result.error.message);
+        };
+    }
     static before(middleware, options = {}) {
         if (!this.beforeMiddlewares)
-            this.beforeMiddlewares = [];
-        this.beforeMiddlewares = this.beforeMiddlewares.concat([[middleware, options]]);
+            this.beforeMiddlewares = {};
+        if (!this.beforeMiddlewares[this.name])
+            this.beforeMiddlewares[this.name] = [];
+        this.beforeMiddlewares[this.name].push([middleware, options]);
     }
     static after(middleware, options = {}) {
         if (!this.afterMiddlewares)
-            this.afterMiddlewares = [];
-        this.afterMiddlewares = this.afterMiddlewares.concat([[middleware, options]]);
-    }
-    static constructorMiddleware(action) {
-        return (request, response, next) => {
-            request.controller = new this(request, response);
-            request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1];
-            request.controller.action = action;
-            next();
-        };
+            this.afterMiddlewares = {};
+        if (!this.afterMiddlewares[this.name])
+            this.afterMiddlewares[this.name] = [];
+        this.afterMiddlewares[this.name].push([middleware, options]);
     }
     static error(errorClass, options = {}) {
         if (!this.errors)
-            this.errors = [];
-        this.errors = this.errors.concat([[errorClass, options]]);
+            this.errors = {};
+        if (!this.errors[this.name])
+            this.errors[this.name] = [];
+        this.errors[this.name].push([errorClass, options]);
+    }
+    static parameter(key, validator, options = {}) {
+        if (!this.parameters)
+            this.parameters = {};
+        if (!this.parameters[this.name])
+            this.parameters[this.name] = [];
+        this.parameters[this.name].push([[key, validator], options]);
     }
     static inheritedProperties(key) {
         // @ts-ignore: method intended for controller instance
-        let inheritedProperties = this[key] || [];
+        let inheritedProperties = (this[key] && this[key][this.name]) || [];
         let proto = this.__proto__;
-        while (proto[key]) {
-            inheritedProperties = proto[key].concat(inheritedProperties);
+        while (proto) {
+            inheritedProperties = ((proto[key] && proto[key][proto.name]) || []).concat(inheritedProperties);
             proto = proto.__proto__;
         }
         return inheritedProperties;
@@ -63,7 +82,16 @@ class Controller {
     static get inheritedErrors() {
         return this.inheritedProperties('errors');
     }
-    static actionErrors(action) {
+    static get inheritedParameters() {
+        return this.inheritedProperties('parameters');
+    }
+    static constructorMiddleware(action) {
+        return (request, response, next) => {
+            request.controller = new this(request, response);
+            request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1];
+            request.controller.action = action;
+            next();
+        };
     }
     static generateActionMiddleware(action) {
         const middleware = this.prototype[action];
@@ -80,7 +108,6 @@ class Controller {
     }
     static generateErrorHandlerMiddleware(errors) {
         return (error, request, response, next) => {
-            console.log(errors, error.constructor);
             if (_.includes(errors, error.constructor))
                 request.controller.errorHandler(error);
             next();
@@ -136,6 +163,13 @@ class Controller {
             };
         }
     }
+    static generateParameterValidationMiddlewares(parameters) {
+        const parameterValidationFunction = this.parameterValidationFunction(parameters);
+        return (request, response, next) => {
+            parameterValidationFunction(request.controller.nonUrlParameters);
+            next();
+        };
+    }
     static generateAfterMiddlewares(middlewares) {
         return middlewares.map(([middleware, options]) => {
             return this.generateAfterMiddleware(middleware);
@@ -145,8 +179,10 @@ class Controller {
         const beforeMiddlewares = this.filter(this.inheritedBeforeMiddlewares, action);
         const afterMiddlewares = this.filter(this.inheritedAfterMiddlewares, action);
         const errors = this.filter(this.inheritedErrors, action).map(([error, options]) => error);
+        const parameters = this.filter(this.inheritedParameters, action);
         return [
             this.constructorMiddleware(action),
+            this.generateParameterValidationMiddlewares(parameters),
             ...this.generateBeforeMiddlewares(beforeMiddlewares),
             this.generateActionMiddleware(action),
             ...this.generateAfterMiddlewares(afterMiddlewares),
@@ -171,6 +207,12 @@ class Controller {
     get params() {
         return this.request.params;
     }
+    get nonUrlParameters() {
+        if (!this._nonUrlParameters) {
+            this._nonUrlParameters = _.merge({}, this.query, this.body);
+        }
+        return this._nonUrlParameters;
+    }
     get body() {
         return this.request.body;
     }
@@ -182,3 +224,4 @@ class Controller {
     }
 }
 exports.Controller = Controller;
+Controller.error(ParameterValidationError_1.ParameterValidationError);

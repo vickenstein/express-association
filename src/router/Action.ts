@@ -96,7 +96,7 @@ export class Action {
 
     try {
       Controller = require(Path.join(Action.controllerPath, this.controller + 'Controller'))
-    } catch {
+    } catch (error) {
       try {
         Controller = require(Path.join(Action.controllerPath, this.controller))
       } catch (error) {
@@ -111,7 +111,31 @@ export class Action {
   }
 
   get errors() {
-    return Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => error.name).join(', ')
+    return Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ')
+  }
+
+  get parameterFields() {
+    const parameterFields: string[] = []
+    Object.keys(this._parameters).forEach(key => {
+      const validator = this._parameters[key]
+      const type = validator.type
+      const presence = validator.flags && validator.flags.presence
+      if (presence === 'forbidden') return
+      parameterFields.push(`${key}: ${type}${presence === 'required' ? ' - required' : ''}`)
+    })
+    return parameterFields.join(', ')
+  }
+
+  get _parameters() {
+    const parameters: any = {}
+    Controller.filter(this.Controller.inheritedParameters, this.action).forEach(([[key, validator], options]) => {
+      parameters[key] = validator.describe()
+    })
+    return parameters
+  }
+
+  get parameters() {
+    return JSON.stringify(this._parameters)
   }
 
   launchOn(application: express.Application) {

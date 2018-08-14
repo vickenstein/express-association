@@ -1,6 +1,8 @@
+import * as Joi from 'joi'
 import * as express from 'express'
 import * as _ from 'lodash'
 import { ApplicationError } from './ApplicationError'
+import { ParameterValidationError } from './ParameterValidationError'
 declare module 'express' {
 
   export interface Request {
@@ -21,10 +23,12 @@ export class Controller {
   action: string
   request: express.Request
   response: express.Response
-  static beforeMiddlewares: any[]
-  static afterMiddlewares: any[]
-  static errors: any[]
-  static parameters: any[]
+  _parameters: any
+  _nonUrlParameters: any[]
+  static beforeMiddlewares: any
+  static afterMiddlewares: any
+  static errors: any
+  static parameters: any
   static __proto__: any
   [action: string]: any
 
@@ -53,36 +57,52 @@ export class Controller {
 
   }
 
-  static before(middleware: any, options: IFilterableOption = {}) {
-    if (!this.beforeMiddlewares) this.beforeMiddlewares = []
-    this.beforeMiddlewares = this.beforeMiddlewares.concat([[middleware, options]])
-  }
+  static parameterValidationFunction(parameters: any[]) {
 
-  static after(middleware: any, options: IFilterableOption = {}) {
-    if (!this.afterMiddlewares) this.afterMiddlewares = []
-    this.afterMiddlewares = this.afterMiddlewares.concat([[middleware, options]])
-  }
+    const JoiSchema: any = {}
 
-  static constructorMiddleware(action: string) {
-    return (request: express.Request, response: express.Response, next: express.NextFunction) => {
-      request.controller = new this(request, response)
-      request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1]
-      request.controller.action = action
-      next()
+    parameters.forEach(([[key, validator], options]) => {
+      JoiSchema[key] = validator
+    })
+
+    const schema = Joi.object(JoiSchema)
+
+    return (parameters: any) => {
+      const result = schema.validate(parameters)
+      if (result.error) throw new ParameterValidationError(result.error.details, result.error.message)
     }
   }
 
+  static before(middleware: any, options: IFilterableOption = {}) {
+    if (!this.beforeMiddlewares) this.beforeMiddlewares = {}
+    if (!this.beforeMiddlewares[this.name]) this.beforeMiddlewares[this.name] = []
+    this.beforeMiddlewares[this.name].push([middleware, options])
+  }
+
+  static after(middleware: any, options: IFilterableOption = {}) {
+    if (!this.afterMiddlewares) this.afterMiddlewares = {}
+    if (!this.afterMiddlewares[this.name]) this.afterMiddlewares[this.name] = []
+    this.afterMiddlewares[this.name].push([middleware, options])
+  }
+
   static error(errorClass: any, options: IFilterableOption = {}) {
-    if (!this.errors) this.errors = []
-    this.errors = this.errors.concat([[errorClass, options]])
+    if (!this.errors) this.errors = {}
+    if (!this.errors[this.name]) this.errors[this.name] = []
+    this.errors[this.name].push([errorClass, options])
+  }
+
+  static parameter(key: string, validator: any, options: IFilterableOption = {}) {
+    if (!this.parameters) this.parameters = {}
+    if (!this.parameters[this.name]) this.parameters[this.name] = []
+    this.parameters[this.name].push([[key, validator], options])
   }
 
   static inheritedProperties(key: string) {
 // @ts-ignore: method intended for controller instance
-    let inheritedProperties: any[] = this[key] || []
+    let inheritedProperties: any[] = (this[key] && this[key][this.name]) || []
     let proto = this.__proto__
-    while (proto[key]) {
-      inheritedProperties = proto[key].concat(inheritedProperties)
+    while (proto) {
+      inheritedProperties = ((proto[key] && proto[key][proto.name]) || []).concat(inheritedProperties)
       proto = proto.__proto__
     }
     return inheritedProperties
@@ -100,8 +120,17 @@ export class Controller {
     return this.inheritedProperties('errors')
   }
 
-  static actionErrors(action: string) {
+  static get inheritedParameters(): any[] {
+    return this.inheritedProperties('parameters')
+  }
 
+  static constructorMiddleware(action: string) {
+    return (request: express.Request, response: express.Response, next: express.NextFunction) => {
+      request.controller = new this(request, response)
+      request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1]
+      request.controller.action = action
+      next()
+    }
   }
 
   static generateActionMiddleware(action: string) {
@@ -120,7 +149,6 @@ export class Controller {
 
   static generateErrorHandlerMiddleware(errors: any[]) {
     return (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => {
-      console.log(errors, error.constructor)
       if (_.includes(errors, error.constructor))
       request.controller.errorHandler(error)
       next()
@@ -175,6 +203,15 @@ export class Controller {
     }
   }
 
+  static generateParameterValidationMiddlewares(parameters: any[]) {
+    const parameterValidationFunction = this.parameterValidationFunction(parameters)
+
+    return (request: express.Request, response: express.Response, next: express.NextFunction) => {
+      parameterValidationFunction(request.controller.nonUrlParameters)
+      next()
+    }
+  }
+
   static generateAfterMiddlewares(middlewares: any[]) {
     return middlewares.map(([middleware, options]) => {
       return this.generateAfterMiddleware(middleware)
@@ -182,13 +219,13 @@ export class Controller {
   }
 
   static middlewares(action: string) {
-
     const beforeMiddlewares = this.filter(this.inheritedBeforeMiddlewares, action)
     const afterMiddlewares = this.filter(this.inheritedAfterMiddlewares, action)
     const errors = this.filter(this.inheritedErrors, action).map(([error, options]) => error)
-
+    const parameters = this.filter(this.inheritedParameters, action)
     return [
       this.constructorMiddleware(action),
+      this.generateParameterValidationMiddlewares(parameters),
       ...this.generateBeforeMiddlewares(beforeMiddlewares),
       this.generateActionMiddleware(action),
       ...this.generateAfterMiddlewares(afterMiddlewares),
@@ -220,6 +257,13 @@ export class Controller {
     return this.request.params
   }
 
+  get nonUrlParameters() {
+    if (!this._nonUrlParameters) {
+      this._nonUrlParameters = _.merge({}, this.query, this.body)
+    }
+    return this._nonUrlParameters
+  }
+
   get body() {
     return this.request.body
   }
@@ -231,3 +275,5 @@ export class Controller {
     return this._parameters
   }
 }
+
+Controller.error(ParameterValidationError)

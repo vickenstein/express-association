@@ -8,7 +8,7 @@ export class ApplicationError extends ExtendableError {
   ['constructor']: typeof ApplicationError
   static status: number
 
-  constructor(message: string = 'There was an error', log?: string) {
+  constructor(message: any = 'There was an error', log?: any) {
     super(message)
     this._log = log
   }
