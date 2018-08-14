@@ -21,6 +21,10 @@ class UserPurchase extends ApiController {
 
 }
 
+UserPurchase.error(ResourceNotFoundError, {
+  only: ['error']
+})
+
 module.exports = {
   UserPurchase
 }

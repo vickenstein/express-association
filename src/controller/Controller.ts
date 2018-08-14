@@ -9,7 +9,7 @@ declare module 'express' {
 
 }
 
-export interface IMiddlewareOption {
+export interface IFilterableOption {
   only?: string[]
   except?: string[]
 }
@@ -21,8 +21,10 @@ export class Controller {
   action: string
   request: express.Request
   response: express.Response
-  static beforeMiddlewares: any
-  static afterMiddlewares: any
+  static beforeMiddlewares: any[]
+  static afterMiddlewares: any[]
+  static errors: any[]
+  static parameters: any[]
   static __proto__: any
   [action: string]: any
 
@@ -51,15 +53,14 @@ export class Controller {
 
   }
 
-  static before(middleware: any, options: IMiddlewareOption = {}) {
+  static before(middleware: any, options: IFilterableOption = {}) {
     if (!this.beforeMiddlewares) this.beforeMiddlewares = []
     this.beforeMiddlewares = this.beforeMiddlewares.concat([[middleware, options]])
   }
 
-  static after(middleware: any, options: IMiddlewareOption = {}) {
-    if (!this.afterMiddlewares) this.afterMiddlewares = {}
-    if (!this.afterMiddlewares[this.name]) this.afterMiddlewares[this.name] = []
-    this.afterMiddlewares[this.name].push([middleware, options])
+  static after(middleware: any, options: IFilterableOption = {}) {
+    if (!this.afterMiddlewares) this.afterMiddlewares = []
+    this.afterMiddlewares = this.afterMiddlewares.concat([[middleware, options]])
   }
 
   static constructorMiddleware(action: string) {
@@ -71,8 +72,9 @@ export class Controller {
     }
   }
 
-  static error() {
-
+  static error(errorClass: any, options: IFilterableOption = {}) {
+    if (!this.errors) this.errors = []
+    this.errors = this.errors.concat([[errorClass, options]])
   }
 
   static inheritedProperties(key: string) {
@@ -94,6 +96,14 @@ export class Controller {
     return this.inheritedProperties('afterMiddlewares')
   }
 
+  static get inheritedErrors(): any[] {
+    return this.inheritedProperties('errors')
+  }
+
+  static actionErrors(action: string) {
+
+  }
+
   static generateActionMiddleware(action: string) {
     const middleware = this.prototype[action]
     if (middleware.constructor.name === 'AsyncFunction') {
@@ -108,15 +118,17 @@ export class Controller {
     }
   }
 
-  static generateErrorHandlerMiddleware(action: string) {
+  static generateErrorHandlerMiddleware(errors: any[]) {
     return (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => {
+      console.log(errors, error.constructor)
+      if (_.includes(errors, error.constructor))
       request.controller.errorHandler(error)
       next()
     }
   }
 
   static filter(list: any[] = [], action: string) {
-    return list.filter(([middleware, options]) => {
+    return list.filter(([thing, options]) => {
       if (options.only) return _.includes(options.only, action)
       if (options.except) return !_.includes(options.except, action)
       return true
@@ -173,13 +185,14 @@ export class Controller {
 
     const beforeMiddlewares = this.filter(this.inheritedBeforeMiddlewares, action)
     const afterMiddlewares = this.filter(this.inheritedAfterMiddlewares, action)
+    const errors = this.filter(this.inheritedErrors, action).map(([error, options]) => error)
 
     return [
       this.constructorMiddleware(action),
       ...this.generateBeforeMiddlewares(beforeMiddlewares),
       this.generateActionMiddleware(action),
       ...this.generateAfterMiddlewares(afterMiddlewares),
-      this.generateErrorHandlerMiddleware(action)
+      this.generateErrorHandlerMiddleware(errors)
     ]
   }
 

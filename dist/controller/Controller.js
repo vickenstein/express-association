@@ -28,10 +28,8 @@ class Controller {
     }
     static after(middleware, options = {}) {
         if (!this.afterMiddlewares)
-            this.afterMiddlewares = {};
-        if (!this.afterMiddlewares[this.name])
-            this.afterMiddlewares[this.name] = [];
-        this.afterMiddlewares[this.name].push([middleware, options]);
+            this.afterMiddlewares = [];
+        this.afterMiddlewares = this.afterMiddlewares.concat([[middleware, options]]);
     }
     static constructorMiddleware(action) {
         return (request, response, next) => {
@@ -40,6 +38,11 @@ class Controller {
             request.controller.action = action;
             next();
         };
+    }
+    static error(errorClass, options = {}) {
+        if (!this.errors)
+            this.errors = [];
+        this.errors = this.errors.concat([[errorClass, options]]);
     }
     static inheritedProperties(key) {
         // @ts-ignore: method intended for controller instance
@@ -57,6 +60,11 @@ class Controller {
     static get inheritedAfterMiddlewares() {
         return this.inheritedProperties('afterMiddlewares');
     }
+    static get inheritedErrors() {
+        return this.inheritedProperties('errors');
+    }
+    static actionErrors(action) {
+    }
     static generateActionMiddleware(action) {
         const middleware = this.prototype[action];
         if (middleware.constructor.name === 'AsyncFunction') {
@@ -70,14 +78,16 @@ class Controller {
             middleware.bind(request.controller)();
         };
     }
-    static generateErrorHandlerMiddleware(action) {
+    static generateErrorHandlerMiddleware(errors) {
         return (error, request, response, next) => {
-            request.controller.errorHandler(error);
+            console.log(errors, error.constructor);
+            if (_.includes(errors, error.constructor))
+                request.controller.errorHandler(error);
             next();
         };
     }
     static filter(list = [], action) {
-        return list.filter(([middleware, options]) => {
+        return list.filter(([thing, options]) => {
             if (options.only)
                 return _.includes(options.only, action);
             if (options.except)
@@ -134,12 +144,13 @@ class Controller {
     static middlewares(action) {
         const beforeMiddlewares = this.filter(this.inheritedBeforeMiddlewares, action);
         const afterMiddlewares = this.filter(this.inheritedAfterMiddlewares, action);
+        const errors = this.filter(this.inheritedErrors, action).map(([error, options]) => error);
         return [
             this.constructorMiddleware(action),
             ...this.generateBeforeMiddlewares(beforeMiddlewares),
             this.generateActionMiddleware(action),
             ...this.generateAfterMiddlewares(afterMiddlewares),
-            this.generateErrorHandlerMiddleware(action)
+            this.generateErrorHandlerMiddleware(errors)
         ];
     }
     status(code) {

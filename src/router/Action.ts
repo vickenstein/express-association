@@ -2,6 +2,7 @@ import * as Path from 'path'
 import * as fs from 'fs'
 import * as express from 'express'
 import { Router } from './Router'
+import { Controller } from '../controller/Controller'
 const PROTOCOLS = ['get', 'post', 'put', 'delete']
 
 let localPath = Path.join(__dirname, '../../..')
@@ -107,6 +108,10 @@ export class Action {
     if (Controller[this.controller + 'Controller']) return Controller[this.controller + 'Controller']
     if (Controller[this.controller]) return Controller[this.controller]
     throw 'the imported controller does not seem to be an controller'
+  }
+
+  get errors() {
+    return Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => error.name).join(', ')
   }
 
   launchOn(application: express.Application) {

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Path = require("path");
 const fs = require("fs");
 const Router_1 = require("./Router");
+const Controller_1 = require("../controller/Controller");
 const PROTOCOLS = ['get', 'post', 'put', 'delete'];
 let localPath = Path.join(__dirname, '../../..');
 if (Path.basename(localPath) === 'node_modules') {
@@ -81,6 +82,9 @@ class Action {
         if (Controller[this.controller])
             return Controller[this.controller];
         throw 'the imported controller does not seem to be an controller';
+    }
+    get errors() {
+        return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => error.name).join(', ');
     }
     launchOn(application) {
         application[this.protocol](this.url, ...this.Controller.middlewares(this.action));

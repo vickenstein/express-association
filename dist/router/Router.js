@@ -164,8 +164,8 @@ class Router {
     get toJson() {
         const actions = [];
         this.forEachAction(action => {
-            const { url, as } = action;
-            actions.push({ url, as });
+            const { url, as, errors } = action;
+            actions.push({ url, as, errors });
         });
         return actions;
     }

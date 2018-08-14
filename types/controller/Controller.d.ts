@@ -5,7 +5,7 @@ declare module 'express' {
         controller: Controller;
     }
 }
-export interface IMiddlewareOption {
+export interface IFilterableOption {
     only?: string[];
     except?: string[];
 }
@@ -15,20 +15,25 @@ export declare class Controller {
     action: string;
     request: express.Request;
     response: express.Response;
-    static beforeMiddlewares: any;
-    static afterMiddlewares: any;
+    static beforeMiddlewares: any[];
+    static afterMiddlewares: any[];
+    static errors: any[];
+    static parameters: any[];
     static __proto__: any;
     [action: string]: any;
     constructor(request: express.Request, response: express.Response);
     errorHandler(error: ApplicationError): void;
-    static before(middleware: any, options?: IMiddlewareOption): void;
-    static after(middleware: any, options?: IMiddlewareOption): void;
+    static before(middleware: any, options?: IFilterableOption): void;
+    static after(middleware: any, options?: IFilterableOption): void;
     static constructorMiddleware(action: string): (request: express.Request, response: express.Response, next: express.NextFunction) => void;
+    static error(errorClass: any, options?: IFilterableOption): void;
     static inheritedProperties(key: string): any[];
     static readonly inheritedBeforeMiddlewares: any[];
     static readonly inheritedAfterMiddlewares: any[];
+    static readonly inheritedErrors: any[];
+    static actionErrors(action: string): void;
     static generateActionMiddleware(action: string): (request: express.Request, response: express.Response) => void;
-    static generateErrorHandlerMiddleware(action: string): (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => void;
+    static generateErrorHandlerMiddleware(errors: any[]): (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => void;
     static filter(list: any[], action: string): any[];
     static generateBeforeMiddleware(middleware: any): any;
     static generateBeforeMiddlewares(middlewares: any[]): any[];

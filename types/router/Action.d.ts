@@ -28,6 +28,7 @@ export declare class Action {
     readonly path: string;
     readonly url: string;
     readonly Controller: any;
+    readonly errors: string;
     launchOn(application: express.Application): void;
 }
 //# sourceMappingURL=Action.d.ts.map
