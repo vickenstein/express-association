@@ -44,6 +44,7 @@ export class Router {
   }
 
   resource(name: string, configuration?: (router: Router) => void) {
+    if (this.isResource) throw 'cannot create resource on resources, try on resource.member | resource.collection'
     const resource = new Router()
     this.actions.push(resource)
     resource._path = Router.trimSlash(name)
@@ -184,6 +185,15 @@ export class Router {
     this.forEachAction((action: Action) => {
       action.launchOn(application)
     })
+  }
+
+  get toJson() {
+    const actions: any[] = []
+    this.forEachAction(action => {
+      const { url, as } = action
+      actions.push({ url, as })
+    })
+    return actions
   }
 
   forEachAction(iterator: (action: Action) => void) {

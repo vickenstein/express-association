@@ -30,6 +30,7 @@ export declare class Router {
     controller(controller: string): this;
     readonly controllerName: string;
     launchOn(application: Application): void;
+    readonly toJson: any[];
     forEachAction(iterator: (action: Action) => void): void;
 }
 export interface IProtocolOptions {

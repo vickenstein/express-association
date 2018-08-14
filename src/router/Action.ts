@@ -28,6 +28,7 @@ export interface IActionOptions {
 }
 
 export class Action {
+
   router: Router
   protocol: string
   _path: string
@@ -75,10 +76,18 @@ export class Action {
     throw `${this.path} action missing controller`
   }
 
+  get as() {
+    return `${this.controller}#${this.action}`
+  }
+
   get path() {
     let path = this.router.path
     if (path && this._path) path += '/'
     return path + this._path
+  }
+
+  get url() {
+    return '/' + this.path
   }
 
   get Controller() {
@@ -89,8 +98,8 @@ export class Action {
     } catch {
       try {
         Controller = require(Path.join(Action.controllerPath, this.controller))
-      } catch {
-        throw "can not find controller";
+      } catch (error) {
+        throw error
       }
     }
 
@@ -101,6 +110,6 @@ export class Action {
   }
 
   launchOn(application: express.Application) {
-    application[this.protocol]('/' + this.path, ...this.Controller.middlewares(this.action))
+    application[this.protocol](this.url, ...this.Controller.middlewares(this.action))
   }
 }

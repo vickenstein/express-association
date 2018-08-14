@@ -49,11 +49,17 @@ class Action {
             return controller;
         throw `${this.path} action missing controller`;
     }
+    get as() {
+        return `${this.controller}#${this.action}`;
+    }
     get path() {
         let path = this.router.path;
         if (path && this._path)
             path += '/';
         return path + this._path;
+    }
+    get url() {
+        return '/' + this.path;
     }
     get Controller() {
         let Controller;
@@ -64,8 +70,8 @@ class Action {
             try {
                 Controller = require(Path.join(Action.controllerPath, this.controller));
             }
-            catch (_b) {
-                throw "can not find controller";
+            catch (error) {
+                throw error;
             }
         }
         if (typeof Controller === 'function')
@@ -77,7 +83,7 @@ class Action {
         throw 'the imported controller does not seem to be an controller';
     }
     launchOn(application) {
-        application[this.protocol]('/' + this.path, ...this.Controller.middlewares(this.action));
+        application[this.protocol](this.url, ...this.Controller.middlewares(this.action));
     }
 }
 exports.Action = Action;

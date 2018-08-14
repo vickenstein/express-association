@@ -1,13 +1,11 @@
 import { Controller } from './controller/Controller'
 import { Router } from './router/Router'
 import { Action } from './router/Action'
-import { Serializer } from './controller/Serializer'
-import { Error } from './controller/Error'
+import { ApplicationError } from './controller/ApplicationError'
 
 export {
   Controller,
   Router,
   Action,
-  Error,
-  Serializer
+  ApplicationError
 }

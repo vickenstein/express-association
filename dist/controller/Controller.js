@@ -6,37 +6,86 @@ class Controller {
         this.request = request;
         this.response = response;
     }
+    errorHandler(error) {
+        console.log({
+            type: error.constructor.name,
+            log: error.log,
+            status: error.status
+        });
+        // @ts-ignore: method intended for controller instance
+        this.status(error.status);
+        // @ts-ignore: method intended for controller instance
+        this.send({
+            type: error.constructor.name,
+            message: error.message,
+            status: error.status
+        });
+    }
     static before(middleware, options = {}) {
-        if (!this._beforeMiddlewares)
-            this._beforeMiddlewares = {};
-        if (!this._beforeMiddlewares[this.name])
-            this._beforeMiddlewares[this.name] = [];
-        this._beforeMiddlewares[this.name].push([middleware, options]);
+        if (!this.beforeMiddlewares)
+            this.beforeMiddlewares = [];
+        this.beforeMiddlewares = this.beforeMiddlewares.concat([[middleware, options]]);
     }
     static after(middleware, options = {}) {
-        if (!this._afterMiddlewares)
-            this._afterMiddlewares = {};
-        if (!this._afterMiddlewares[this.name])
-            this._afterMiddlewares[this.name] = [];
-        this._afterMiddlewares[this.name].push([middleware, options]);
+        if (!this.afterMiddlewares)
+            this.afterMiddlewares = {};
+        if (!this.afterMiddlewares[this.name])
+            this.afterMiddlewares[this.name] = [];
+        this.afterMiddlewares[this.name].push([middleware, options]);
     }
-    static get constructorMiddleware() {
+    static constructorMiddleware(action) {
         return (request, response, next) => {
             request.controller = new this(request, response);
+            request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1];
+            request.controller.action = action;
             next();
         };
     }
-    static get beforeMiddlewares() {
-        const parentMiddleware = this.__proto__.beforeMiddlewares || [];
-        const localMiddleware = (this._beforeMiddlewares && this._beforeMiddlewares[this.name]) || [];
-        return [...parentMiddleware, ...localMiddleware];
+    static inheritedProperties(key) {
+        // @ts-ignore: method intended for controller instance
+        let inheritedProperties = this[key] || [];
+        let proto = this.__proto__;
+        while (proto[key]) {
+            inheritedProperties = proto[key].concat(inheritedProperties);
+            proto = proto.__proto__;
+        }
+        return inheritedProperties;
     }
-    static get afterMiddlewares() {
-        const parentMiddleware = this.__proto__.afterMiddlewares || [];
-        const localMiddleware = (this._afterMiddlewares && this._afterMiddlewares[this.name]) || [];
-        return [...parentMiddleware, ...localMiddleware];
+    static get inheritedBeforeMiddlewares() {
+        return this.inheritedProperties('beforeMiddlewares');
     }
-    static generateExpressMiddleware(middleware) {
+    static get inheritedAfterMiddlewares() {
+        return this.inheritedProperties('afterMiddlewares');
+    }
+    static generateActionMiddleware(action) {
+        const middleware = this.prototype[action];
+        if (middleware.constructor.name === 'AsyncFunction') {
+            return (request, response) => {
+                middleware.bind(request.controller)().catch((error) => {
+                    throw error;
+                });
+            };
+        }
+        return (request, response) => {
+            middleware.bind(request.controller)();
+        };
+    }
+    static generateErrorHandlerMiddleware(action) {
+        return (error, request, response, next) => {
+            request.controller.errorHandler(error);
+            next();
+        };
+    }
+    static filter(list = [], action) {
+        return list.filter(([middleware, options]) => {
+            if (options.only)
+                return _.includes(options.only, action);
+            if (options.except)
+                return !_.includes(options.except, action);
+            return true;
+        });
+    }
+    static generateBeforeMiddleware(middleware) {
         if (typeof middleware === 'string')
             middleware = this.prototype[middleware];
         if (!middleware.length) {
@@ -52,42 +101,49 @@ class Controller {
         }
         return middleware;
     }
-    static generateActionMiddleware(action) {
-        const middleware = this.prototype[action];
-        if (middleware.constructor.name === 'AsyncFunction') {
-            return (request, response) => {
-                middleware.bind(request.controller)().catch((error) => {
-                    throw error;
-                });
-            };
-        }
-        return (request, response) => {
-            middleware.bind(request.controller)();
-        };
-    }
-    static filter(list = [], action) {
-        return list.filter(([middleware, options]) => {
-            if (options.only)
-                return _.includes(options.only, action);
-            if (options.except)
-                return !_.includes(options.except, action);
-            return true;
+    static generateBeforeMiddlewares(middlewares) {
+        return middlewares.map(([middleware, options]) => {
+            return this.generateBeforeMiddleware(middleware);
         });
     }
-    static generateExpressMiddlewares(middlewares) {
+    static generateAfterMiddleware(middleware) {
+        if (typeof middleware === 'string')
+            middleware = this.prototype[middleware];
+        if (!middleware.length) {
+            if (middleware.constructor.name === 'AsyncFunction') {
+                return (error, request, response, next) => {
+                    if (!error)
+                        return next();
+                    middleware.bind(request.controller)().then(next).catch(next);
+                };
+            }
+            return (error, request, response, next) => {
+                if (!error)
+                    return next();
+                request.controller.error = error;
+                middleware.bind(request.controller)();
+                next();
+            };
+        }
+    }
+    static generateAfterMiddlewares(middlewares) {
         return middlewares.map(([middleware, options]) => {
-            return this.generateExpressMiddleware(middleware);
+            return this.generateAfterMiddleware(middleware);
         });
     }
     static middlewares(action) {
-        const beforeMiddlewares = this.filter(this.beforeMiddlewares, action);
-        const afterMiddlewares = this.filter(this.afterMiddlewares, action);
+        const beforeMiddlewares = this.filter(this.inheritedBeforeMiddlewares, action);
+        const afterMiddlewares = this.filter(this.inheritedAfterMiddlewares, action);
         return [
-            this.constructorMiddleware,
-            ...this.generateExpressMiddlewares(beforeMiddlewares),
+            this.constructorMiddleware(action),
+            ...this.generateBeforeMiddlewares(beforeMiddlewares),
             this.generateActionMiddleware(action),
-            ...this.generateExpressMiddlewares(afterMiddlewares)
+            ...this.generateAfterMiddlewares(afterMiddlewares),
+            this.generateErrorHandlerMiddleware(action)
         ];
+    }
+    status(code) {
+        this.response.status(code);
     }
     setHeader(name, value) {
         this.response.setHeader(name, value);

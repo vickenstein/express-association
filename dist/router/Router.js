@@ -29,6 +29,8 @@ class Router {
         return route;
     }
     resource(name, configuration) {
+        if (this.isResource)
+            throw 'cannot create resource on resources, try on resource.member | resource.collection';
         const resource = new Router();
         this.actions.push(resource);
         resource._path = Router.trimSlash(name);
@@ -158,6 +160,14 @@ class Router {
         this.forEachAction((action) => {
             action.launchOn(application);
         });
+    }
+    get toJson() {
+        const actions = [];
+        this.forEachAction(action => {
+            const { url, as } = action;
+            actions.push({ url, as });
+        });
+        return actions;
     }
     forEachAction(iterator) {
         this.actions.forEach((routerOrAction) => {

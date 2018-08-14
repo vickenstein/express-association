@@ -24,7 +24,9 @@ export declare class Action {
     constructor({ router, path, protocol, controller, action }: IActionOptions);
     readonly action: string;
     readonly controller: string;
+    readonly as: string;
     readonly path: string;
+    readonly url: string;
     readonly Controller: any;
     launchOn(application: express.Application): void;
 }
