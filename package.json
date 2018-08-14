@@ -1,8 +1,9 @@
 {
   "name": "express-association",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A controller plugin designed to utilize mongoose with the mongoose-associations plugin",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "gulp package && NODE_PATH=. mocha --recursive --exit"
   },

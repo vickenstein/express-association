@@ -15,7 +15,7 @@ class UserController extends ApiController {
     })
   }
 
-  create() {
+  async create() {
     this.send({
       create: this.parameters.test
     })
