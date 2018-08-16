@@ -1,7 +1,7 @@
-const request = require('test/helpers/request')
+const request = require('../helpers/request')
 const { assert } = require('chai')
 
-const ResourceNotFoundError = require('test/example/errors/ResourceNotFoundError')
+const ResourceNotFoundError = require('../example/errors/ResourceNotFoundError')
 
 describe('ApplicationError', () => {
   describe('ResourceNotFoundError', () => {

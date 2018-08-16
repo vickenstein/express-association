@@ -1,12 +1,11 @@
 const Path = require('path')
-const request = require('test/helpers/request')
-const { Router } = require('dist/index')
-const { Action } = require('dist/router/Action')
+const request = require('../helpers/request')
+const { Router, Action } = require('../../dist/index')
 const { assert } = require('chai')
 
-const UserController = require('test/example/controllers/UserController')
-const HomeController = require('test/example/controllers/HomeController')
-const { UserPurchase } = require('test/example/controllers/UserPurchase')
+const UserController = require('../example/controllers/UserController')
+const HomeController = require('../example/controllers/HomeController')
+const { UserPurchase } = require('../example/controllers/UserPurchase')
 Object.defineProperty(Action, 'localPath', {
   get: function() { return Path.join(__dirname, '../example') }
 })

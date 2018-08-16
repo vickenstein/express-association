@@ -1,5 +1,5 @@
 const Joi = require('joi')
-const { Controller } = require('dist/index')
+const { Controller } = require('../../../dist/index')
 const RandomError = require('../errors/RandomError')
 
 class ApiController extends Controller {

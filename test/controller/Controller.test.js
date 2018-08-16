@@ -1,6 +1,6 @@
-const request = require('test/helpers/request')
-const ApiController = require('test/example/controllers/ApiController')
-const UserController = require('test/example/controllers/ApiController')
+const request = require('../helpers/request')
+const ApiController = require('../example/controllers/ApiController')
+const UserController = require('../example/controllers/ApiController')
 const { assert } = require('chai')
 
 describe('Controller', () => {

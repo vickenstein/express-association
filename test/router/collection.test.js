@@ -1,5 +1,5 @@
-const request = require('test/helpers/request')
-const { Router } = require('dist/index')
+const request = require('../helpers/request')
+const { Router } = require('../../dist/index')
 const { assert } = require('chai')
 
 describe('collection', () => {

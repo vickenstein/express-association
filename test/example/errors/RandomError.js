@@ -1,4 +1,4 @@
-const { ApplicationError } = require('dist/index')
+const { ApplicationError } = require('../../../dist/index')
 
 module.exports = class RandomError extends ApplicationError {
 

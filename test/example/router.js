@@ -1,5 +1,5 @@
 const Path = require('path')
-const { Router, Action } = require('dist/index')
+const { Router, Action } = require('../../dist/index')
 
 Object.defineProperty(Action, 'localPath', {
   get: function() { return Path.join(__dirname, '../example') }

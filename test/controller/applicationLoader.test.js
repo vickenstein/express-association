@@ -1,4 +1,4 @@
-const request = require('test/helpers/request')
+const request = require('../helpers/request')
 const { expect } = require('chai')
 
 describe('initialize and setup express application', () => {
