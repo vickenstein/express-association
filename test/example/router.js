@@ -1,7 +1,7 @@
 const Path = require('path')
-const { Router, Action } = require('../../dist/index')
-
-Object.defineProperty(Action, 'localPath', {
+const { Router } = require('../../dist/index')
+const { ClassFinder } = require('node-association')
+Object.defineProperty(ClassFinder, 'localPath', {
   get: function() { return Path.join(__dirname, '../example') }
 })
 

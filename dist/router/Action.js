@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Path = require("path");
-const fs = require("fs");
 const Router_1 = require("./Router");
 const Controller_1 = require("../controller/Controller");
+const node_association_1 = require("node-association");
 const PROTOCOLS = ['get', 'post', 'put', 'delete'];
 let localPath = Path.join(__dirname, '../../..');
 if (Path.basename(localPath) === 'node_modules') {
@@ -13,23 +13,6 @@ let controllerPath;
 class Action {
     static get protocols() {
         return PROTOCOLS;
-    }
-    static get localPath() {
-        return localPath;
-    }
-    static get controllerPath() {
-        if (controllerPath)
-            return controllerPath;
-        if (fs.existsSync(Path.join(this.localPath, 'controllers'))) {
-            return controllerPath = Path.join(this.localPath, 'controllers');
-        }
-        if (fs.existsSync(Path.join(this.localPath, 'dist/controllers'))) {
-            return controllerPath = Path.join(this.localPath, 'dist/controllers');
-        }
-        if (fs.existsSync(Path.join(this.localPath, 'src/controllers'))) {
-            return controllerPath = Path.join(this.localPath, 'src/controllers');
-        }
-        throw 'cannot find controller directory';
     }
     constructor({ router, path, protocol, controller, action }) {
         this.protocol = protocol;
@@ -63,25 +46,7 @@ class Action {
         return '/' + this.path;
     }
     get Controller() {
-        let Controller;
-        try {
-            Controller = require(Path.join(Action.controllerPath, this.controller + 'Controller'));
-        }
-        catch (error) {
-            try {
-                Controller = require(Path.join(Action.controllerPath, this.controller));
-            }
-            catch (error) {
-                throw error;
-            }
-        }
-        if (typeof Controller === 'function')
-            return Controller;
-        if (Controller[this.controller + 'Controller'])
-            return Controller[this.controller + 'Controller'];
-        if (Controller[this.controller])
-            return Controller[this.controller];
-        throw 'the imported controller does not seem to be an controller';
+        return node_association_1.ClassFinder.classFor(this.controller, 'Controller');
     }
     get errors() {
         return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');

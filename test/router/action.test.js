@@ -6,7 +6,8 @@ const { assert } = require('chai')
 const UserController = require('../example/controllers/UserController')
 const HomeController = require('../example/controllers/HomeController')
 const { UserPurchase } = require('../example/controllers/UserPurchase')
-Object.defineProperty(Action, 'localPath', {
+const { ClassFinder } = require('node-association')
+Object.defineProperty(ClassFinder, 'localPath', {
   get: function() { return Path.join(__dirname, '../example') }
 })
 

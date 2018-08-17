@@ -19,8 +19,6 @@ export declare class Action {
     _controller: string;
     _action: string;
     static readonly protocols: string[];
-    static readonly localPath: string;
-    static readonly controllerPath: string;
     constructor({ router, path, protocol, controller, action }: IActionOptions);
     readonly action: string;
     readonly controller: string;
