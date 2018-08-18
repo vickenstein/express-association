@@ -209,6 +209,9 @@ class Controller {
         this.response.render(view, options, callback);
     }
     //request
+    get(field) {
+        return this.request.get(field);
+    }
     get ip() {
         return this.request.ip;
     }

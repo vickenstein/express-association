@@ -254,11 +254,15 @@ export class Controller {
     this.response.redirect(status, url)
   }
 
-  render(view: string, options?: Object, callback: (error: Error, html: string) => void) {
+  render(view: string, options?: Object, callback?: (error: Error, html: string) => void) {
     this.response.render(view, options, callback)
   }
 
   //request
+
+  get(field: string) {
+    return this.request.get(field)
+  }
 
   get ip() {
     return this.request.ip

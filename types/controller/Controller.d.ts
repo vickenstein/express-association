@@ -50,7 +50,8 @@ export declare class Controller {
     json(body?: any): void;
     send(body?: any): void;
     redirect(status: number, url: string): void;
-    render(view: string, options?: Object, callback: (error: Error, html: string) => void): void;
+    render(view: string, options?: Object, callback?: (error: Error, html: string) => void): void;
+    get(field: string): string;
     readonly ip: string;
     readonly ips: string[];
     readonly hostname: string;
