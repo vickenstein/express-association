@@ -96,10 +96,8 @@ class Controller {
     static generateActionMiddleware(action) {
         const middleware = this.prototype[action];
         if (middleware.constructor.name === 'AsyncFunction') {
-            return (request, response) => {
-                middleware.bind(request.controller)().catch((error) => {
-                    throw error;
-                });
+            return (request, response, next) => {
+                middleware.bind(request.controller)().catch(next);
             };
         }
         return (request, response) => {
@@ -109,8 +107,8 @@ class Controller {
     static generateErrorHandlerMiddleware(errors) {
         return (error, request, response, next) => {
             if (_.includes(errors, error.constructor))
-                request.controller.errorHandler(error);
-            next();
+                return request.controller.errorHandler(error);
+            next(error);
         };
     }
     static filter(list = [], action) {
@@ -151,6 +149,7 @@ class Controller {
                 return (error, request, response, next) => {
                     if (!error)
                         return next();
+                    request.controller.error = error;
                     middleware.bind(request.controller)().then(next).catch(next);
                 };
             }

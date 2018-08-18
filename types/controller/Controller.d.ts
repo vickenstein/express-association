@@ -36,7 +36,7 @@ export declare class Controller {
     static readonly inheritedErrors: any[];
     static readonly inheritedParameters: any[];
     static constructorMiddleware(action: string): (request: express.Request, response: express.Response, next: express.NextFunction) => void;
-    static generateActionMiddleware(action: string): (request: express.Request, response: express.Response) => void;
+    static generateActionMiddleware(action: string): (request: express.Request, response: express.Response, next: express.NextFunction) => void;
     static generateErrorHandlerMiddleware(errors: any[]): (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => void;
     static filter(list: any[], action: string): any[];
     static generateBeforeMiddleware(middleware: any): any;

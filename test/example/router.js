@@ -21,7 +21,10 @@ module.exports = new Router(router => {
     resource.member.resource('UserPurchase', resource => {
 
       resource.only('index', 'show')
+      resource.member.get('fine')
+      resource.member.get('not_fine', { action: 'notFine' })
       resource.member.get('error')
+      resource.member.get('async_error', { action: 'asyncError' })
 
     })
   })

@@ -16,6 +16,28 @@ describe('UserPurchase', () => {
         status: 404
       })
     })
+    it('caught not found error', async () => {
+      const response = await request.get('/test/users/1337/user_purchases/1337/async_error')
+      expect(response.body).to.deep.equal({
+        type: 'ResourceNotFoundError',
+        message: 'There was an error',
+        status: 404
+      })
+    })
+    it('caught not found error', async () => {
+      const response = await request.get('/test/users/1337/user_purchases/1337/fine')
+      expect(response.body).to.deep.equal({
+        type: 'ResourceNotFoundError',
+        message: 'There was an error',
+        status: 404
+      })
+    })
+    it('caught not found error', async () => {
+      const response = await request.get('/test/users/1337/user_purchases/1337/not_fine')
+      expect(response.body).to.deep.equal({
+        test: 'test'
+      })
+    })
     it('caught an invalid error', async () => {
       const response = await request.get('/test/users/1337/user_purchases/1337?test=test')
       expect(response.body).to.deep.equal({

@@ -136,10 +136,8 @@ export class Controller {
   static generateActionMiddleware(action: string) {
     const middleware = this.prototype[action]
     if (middleware.constructor.name === 'AsyncFunction') {
-      return (request: express.Request, response: express.Response) => {
-        middleware.bind(request.controller)().catch((error: any) => {
-          throw error
-        })
+      return (request: express.Request, response: express.Response, next: express.NextFunction) => {
+        middleware.bind(request.controller)().catch(next)
       }
     }
     return (request: express.Request, response: express.Response) => {
@@ -149,9 +147,8 @@ export class Controller {
 
   static generateErrorHandlerMiddleware(errors: any[]) {
     return (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => {
-      if (_.includes(errors, error.constructor))
-      request.controller.errorHandler(error)
-      next()
+      if (_.includes(errors, error.constructor)) return request.controller.errorHandler(error)
+      next(error)
     }
   }
 
@@ -191,6 +188,7 @@ export class Controller {
       if (middleware.constructor.name === 'AsyncFunction') {
         return (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => {
           if (!error) return next()
+          request.controller.error = error
           middleware.bind(request.controller)().then(next).catch(next)
         }
       }

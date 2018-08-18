@@ -20,7 +20,7 @@ gulp.task('ts:compile', (done) => {
 })
 
 gulp.task('routes', (done) => {
-  console.table(require('test/example/router').toJson)
+  console.table(require('./test/example/router').toJson)
   done()
 })
 
