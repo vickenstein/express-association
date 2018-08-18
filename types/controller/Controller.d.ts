@@ -49,10 +49,24 @@ export declare class Controller {
     setHeader(name: string, value: string | number | string[]): void;
     json(body?: any): void;
     send(body?: any): void;
+    redirect(status: number, url: string): void;
+    render(view: string, options?: Object, callback: (error: Error, html: string) => void): void;
+    readonly ip: string;
+    readonly ips: string[];
+    readonly hostname: string;
+    readonly method: string;
+    readonly originalUrl: string;
+    readonly protocol: string;
     readonly query: any;
     readonly params: any;
-    readonly nonUrlParameters: any[];
     readonly body: any;
+    readonly route: any;
+    readonly secure: boolean;
+    readonly signedCookies: any;
+    readonly fresh: boolean;
+    readonly stale: boolean;
+    readonly xhr: boolean;
+    readonly nonUrlParameters: any[];
     readonly parameters: any;
 }
 //# sourceMappingURL=Controller.d.ts.map

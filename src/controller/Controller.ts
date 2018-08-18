@@ -129,6 +129,7 @@ export class Controller {
       request.controller = new this(request, response)
       request.controller.controller = this.name.match(/(\w+)(Controller)?/)[1]
       request.controller.action = action
+      response.locals = request.controller
       next()
     }
   }
@@ -231,6 +232,8 @@ export class Controller {
     ]
   }
 
+  //response
+
   status(code: number) {
     this.response.status(code)
   }
@@ -247,6 +250,40 @@ export class Controller {
     this.response.send(body)
   }
 
+  redirect(status: number, url: string) {
+    this.response.redirect(status, url)
+  }
+
+  render(view: string, options?: Object, callback: (error: Error, html: string) => void) {
+    this.response.render(view, options, callback)
+  }
+
+  //request
+
+  get ip() {
+    return this.request.ip
+  }
+
+  get ips() {
+    return this.request.ips
+  }
+
+  get hostname() {
+    return this.request.hostname
+  }
+
+  get method() {
+    return this.request.method
+  }
+
+  get originalUrl() {
+    return this.request.originalUrl
+  }
+
+  get protocol() {
+    return this.request.protocol
+  }
+
   get query() {
     return this.request.query
   }
@@ -255,15 +292,39 @@ export class Controller {
     return this.request.params
   }
 
+  get body() {
+    return this.request.body
+  }
+
+  get route() {
+    return this.request.route
+  }
+
+  get secure() {
+    return this.request.secure
+  }
+
+  get signedCookies() {
+    return this.request.signedCookies
+  }
+
+  get fresh() {
+    return this.request.fresh
+  }
+
+  get stale() {
+    return this.request.stale
+  }
+
+  get xhr() {
+    return this.request.xhr
+  }
+
   get nonUrlParameters() {
     if (!this._nonUrlParameters) {
       this._nonUrlParameters = _.merge({}, this.query, this.body)
     }
     return this._nonUrlParameters
-  }
-
-  get body() {
-    return this.request.body
   }
 
   get parameters() {
