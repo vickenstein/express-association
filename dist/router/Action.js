@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Path = require("path");
+const _ = require("lodash");
 const Router_1 = require("./Router");
 const Controller_1 = require("../controller/Controller");
 const node_association_1 = require("node-association");
@@ -48,8 +49,14 @@ class Action {
     get Controller() {
         return node_association_1.ClassFinder.classFor(this.controller, 'Controller');
     }
+    get _errors() {
+        return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action);
+    }
     get errors() {
-        return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');
+        return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log']));
+    }
+    get errorStatuses() {
+        return this._errors.map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');
     }
     get parameterFields() {
         const parameterFields = [];

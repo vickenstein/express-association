@@ -26,7 +26,9 @@ export declare class Action {
     readonly path: string;
     readonly url: string;
     readonly Controller: any;
-    readonly errors: string;
+    readonly _errors: any[];
+    readonly errors: Pick<any, "status" | "message" | "log">[];
+    readonly errorStatuses: string;
     readonly parameterFields: string;
     readonly parameters: any;
     launchOn(application: express.Application): void;

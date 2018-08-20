@@ -1,5 +1,6 @@
 import * as Path from 'path'
 import * as fs from 'fs'
+import * as _ from 'lodash'
 import * as express from 'express'
 import { Router } from './Router'
 import { Controller } from '../controller/Controller'
@@ -78,8 +79,16 @@ export class Action {
     return ClassFinder.classFor(this.controller, 'Controller')
   }
 
+  get _errors() {
+    return Controller.filter(this.Controller.inheritedErrors, this.action)
+  }
+
   get errors() {
-    return Controller.filter(this.Controller.inheritedErrors, this.action).map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ')
+    return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log']))
+  }
+
+  get errorStatuses() {
+    return this._errors.map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ')
   }
 
   get parameterFields() {
