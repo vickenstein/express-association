@@ -53,8 +53,8 @@ class Action {
     }
     get parameterFields() {
         const parameterFields = [];
-        Object.keys(this._parameters).forEach(key => {
-            const validator = this._parameters[key];
+        Object.keys(this.parameters).forEach(key => {
+            const validator = this.parameters[key];
             const type = validator.type;
             const presence = validator.flags && validator.flags.presence;
             if (presence === 'forbidden')
@@ -63,15 +63,12 @@ class Action {
         });
         return parameterFields.join(', ');
     }
-    get _parameters() {
+    get parameters() {
         const parameters = {};
         Controller_1.Controller.filter(this.Controller.inheritedParameters, this.action).forEach(([[key, validator], options]) => {
             parameters[key] = validator.describe();
         });
         return parameters;
-    }
-    get parameters() {
-        return JSON.stringify(this._parameters);
     }
     launchOn(application) {
         application[this.protocol](this.url, ...this.Controller.middlewares(this.action));

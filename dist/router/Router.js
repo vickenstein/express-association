@@ -169,6 +169,14 @@ class Router {
         });
         return actions;
     }
+    get doc() {
+        const actions = [];
+        this.forEachAction(action => {
+            const { url, as, errors, parameters } = action;
+            actions.push({ url, as, errors, parameters });
+        });
+        return actions;
+    }
     forEachAction(iterator) {
         this.actions.forEach((routerOrAction) => {
             if (routerOrAction instanceof Action_1.Action)

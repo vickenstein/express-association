@@ -28,8 +28,7 @@ export declare class Action {
     readonly Controller: any;
     readonly errors: string;
     readonly parameterFields: string;
-    readonly _parameters: any;
-    readonly parameters: string;
+    readonly parameters: any;
     launchOn(application: express.Application): void;
 }
 //# sourceMappingURL=Action.d.ts.map

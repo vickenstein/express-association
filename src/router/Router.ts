@@ -196,6 +196,15 @@ export class Router {
     return actions
   }
 
+  get doc() {
+    const actions: any[] = []
+    this.forEachAction(action => {
+      const { url, as, errors, parameters } = action
+      actions.push({ url, as, errors, parameters })
+    })
+    return actions
+  }
+
   forEachAction(iterator: (action: Action) => void) {
     this.actions.forEach((routerOrAction: Router | Action) => {
       if (routerOrAction instanceof Action) return iterator(routerOrAction)
