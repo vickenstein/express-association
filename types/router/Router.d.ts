@@ -23,6 +23,7 @@ export declare class Router {
     namespace(namespace: string): this;
     only(...actions: string[]): this;
     readonly name: string;
+    readonly namespacelessName: string;
     readonly collectionName: string;
     readonly memberName: string;
     readonly path: string;

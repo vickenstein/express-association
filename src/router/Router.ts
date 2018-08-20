@@ -1,6 +1,7 @@
 import * as inflection from 'inflection'
 import * as _ from 'lodash'
 import { Application } from 'express'
+import { ClassFinder } from 'node-association'
 import { Action, IActionOptions } from './Action'
 
 const DEFAULT_RESOURCE_ACTIONS = ['index', 'show', 'create', 'update', 'delete']
@@ -95,12 +96,16 @@ export class Router {
     return this._path
   }
 
+  get namespacelessName() {
+    return ClassFinder.removeNamespace(this.name)
+  }
+
   get collectionName() {
-    return inflection.underscore(inflection.pluralize(this.name)).toLowerCase()
+    return inflection.underscore(inflection.pluralize(this.namespacelessName)).toLowerCase()
   }
 
   get memberName() {
-    const name = this.parent.name
+    const name = this.parent.namespacelessName
     return `:${name.charAt(0).toLowerCase()}${name.substr(1)}Id`
   }
 

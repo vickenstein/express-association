@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const inflection = require("inflection");
 const _ = require("lodash");
+const node_association_1 = require("node-association");
 const Action_1 = require("./Action");
 const DEFAULT_RESOURCE_ACTIONS = ['index', 'show', 'create', 'update', 'delete'];
 class Router {
@@ -74,11 +75,14 @@ class Router {
     get name() {
         return this._path;
     }
+    get namespacelessName() {
+        return node_association_1.ClassFinder.removeNamespace(this.name);
+    }
     get collectionName() {
-        return inflection.underscore(inflection.pluralize(this.name)).toLowerCase();
+        return inflection.underscore(inflection.pluralize(this.namespacelessName)).toLowerCase();
     }
     get memberName() {
-        const name = this.parent.name;
+        const name = this.parent.namespacelessName;
         return `:${name.charAt(0).toLowerCase()}${name.substr(1)}Id`;
     }
     get path() {
