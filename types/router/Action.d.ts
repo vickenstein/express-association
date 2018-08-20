@@ -27,7 +27,7 @@ export declare class Action {
     readonly url: string;
     readonly Controller: any;
     readonly _errors: any[];
-    readonly errors: Pick<any, "status" | "message" | "log">[];
+    readonly errors: Pick<any, "status" | "message" | "log" | "type">[];
     readonly errorStatuses: string;
     readonly parameterFields: string;
     readonly parameters: any;

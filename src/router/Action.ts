@@ -84,7 +84,7 @@ export class Action {
   }
 
   get errors() {
-    return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log']))
+    return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log', 'type']))
   }
 
   get errorStatuses() {

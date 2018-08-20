@@ -7,6 +7,9 @@ class ApplicationError extends ExtendableError {
         super(message);
         this._log = log;
     }
+    get type() {
+        return this.constructor.name;
+    }
     get status() {
         return this.constructor.status || 500;
     }

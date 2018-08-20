@@ -40,7 +40,7 @@ export class Controller {
   errorHandler(error: ApplicationError) {
 
     console.log({
-      type: error.constructor.name,
+      type: error.type,
       log: error.log,
       status: error.status
     })
@@ -50,7 +50,7 @@ export class Controller {
 
 // @ts-ignore: method intended for controller instance
     this.send({
-      type: error.constructor.name,
+      type: error.type,
       message: error.message,
       status: error.status
     })

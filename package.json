@@ -1,6 +1,6 @@
 {
   "name": "express-association",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A controller plugin designed to utilize mongoose with the mongoose-associations plugin",
   "main": "dist/index.js",
   "types": "types/index.d.ts",

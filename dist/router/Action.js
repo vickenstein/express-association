@@ -53,7 +53,7 @@ class Action {
         return Controller_1.Controller.filter(this.Controller.inheritedErrors, this.action);
     }
     get errors() {
-        return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log']));
+        return this._errors.map(([error, options]) => _.pick(new error, ['status', 'message', 'log', 'type']));
     }
     get errorStatuses() {
         return this._errors.map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');

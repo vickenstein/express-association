@@ -5,6 +5,7 @@ export declare class ApplicationError extends ExtendableError {
     ['constructor']: typeof ApplicationError;
     static status: number;
     constructor(message?: any, log?: any);
+    readonly type: string;
     readonly status: number;
     readonly log: string;
 }
