@@ -40,6 +40,6 @@
     "inflection": "^1.12.0",
     "joi": "^13.6.0",
     "lodash": "^4.17.10",
-    "node-association": "0.0.5"
+    "node-association": "0.0.6"
   }
 }
