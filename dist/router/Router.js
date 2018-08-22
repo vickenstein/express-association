@@ -123,7 +123,7 @@ class Router {
         }
         if (_.includes(only, 'create')) {
             iterator(new Action_1.Action({
-                router: this.member,
+                router: this.collection,
                 path: '',
                 protocol: 'post',
                 action: 'create'

@@ -22,7 +22,7 @@ describe('UserController', () => {
   })
   describe('#create', () => {
     it('received a proper response from User#create', async () => {
-      const response = await request.post('/test/users/1337').send({
+      const response = await request.post('/test/users').send({
         test: 'test'
       })
       expect(response.body).to.deep.equal({ create: 'test' })
