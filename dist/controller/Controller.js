@@ -10,6 +10,7 @@ class Controller {
         this.response = response;
     }
     errorHandler(error) {
+        console.log(error.stack);
         console.log({
             type: error.type,
             log: error.log,
@@ -112,7 +113,7 @@ class Controller {
                 return request.controller.errorHandler(error);
             }
             else {
-                return request.controller.errorHandler(new UncaughtError_1.UncaughtError(undefined, undefined, error.stack));
+                return request.controller.errorHandler(new UncaughtError_1.UncaughtError(undefined, error.message, error.stack));
             }
             next(error);
         };

@@ -5,6 +5,7 @@ export class ApplicationError extends ExtendableError {
 
   _log: string
   message: string
+  stack: any
   ['constructor']: typeof ApplicationError
   static status: number
 

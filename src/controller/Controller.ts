@@ -40,6 +40,8 @@ export class Controller {
 
   errorHandler(error: ApplicationError) {
 
+    console.log(error.stack)
+
     console.log({
       type: error.type,
       log: error.log,
@@ -152,7 +154,7 @@ export class Controller {
       if (_.includes(errors, error.constructor)) {
         return request.controller.errorHandler(error)
       } else {
-        return request.controller.errorHandler(new UncaughtError(undefined, undefined, error.stack))
+        return request.controller.errorHandler(new UncaughtError(undefined, error.message, error.stack))
       }
       next(error)
     }
