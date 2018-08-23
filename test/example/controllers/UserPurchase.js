@@ -61,6 +61,8 @@ UserPurchase.error(ResourceNotFoundError, {
   only: ['error', 'asyncError', 'fine']
 })
 
+UserPurchase.parameter('multi', [Joi.string(), Joi.number()])
+
 UserPurchase.parameter('test', Joi.any().forbidden())
 
 module.exports = {

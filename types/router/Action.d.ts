@@ -18,6 +18,7 @@ export declare class Action {
     _path: string;
     _controller: string;
     _action: string;
+    ['constructor']: typeof Action;
     static readonly protocols: string[];
     constructor({ router, path, protocol, controller, action }: IActionOptions);
     readonly action: string;
@@ -29,6 +30,7 @@ export declare class Action {
     readonly _errors: any[];
     readonly errors: Pick<any, "status" | "message" | "log" | "type">[];
     readonly errorStatuses: string;
+    static parameterToString(validator: any): string;
     readonly parameterFields: string;
     readonly parameters: any;
     launchOn(application: express.Application): void;

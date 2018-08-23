@@ -12,15 +12,15 @@ if (Path.basename(localPath) === 'node_modules') {
 }
 let controllerPath;
 class Action {
-    static get protocols() {
-        return PROTOCOLS;
-    }
     constructor({ router, path, protocol, controller, action }) {
         this.protocol = protocol;
         this.router = router;
         this._path = Router_1.Router.trimSlash(path);
         this._controller = controller;
         this._action = action;
+    }
+    static get protocols() {
+        return PROTOCOLS;
     }
     get action() {
         if (this._action)
@@ -58,22 +58,40 @@ class Action {
     get errorStatuses() {
         return this._errors.map(([error, options]) => `${error.name}: ${error.status || 500}`).join(', ');
     }
+    static parameterToString(validator) {
+        const type = validator.type;
+        const presence = validator.flags && validator.flags.presence;
+        if (presence === 'forbidden')
+            return;
+        return `${type}${presence === 'required' ? ' - required' : ''}`;
+    }
     get parameterFields() {
         const parameterFields = [];
         Object.keys(this.parameters).forEach(key => {
             const validator = this.parameters[key];
-            const type = validator.type;
-            const presence = validator.flags && validator.flags.presence;
-            if (presence === 'forbidden')
-                return;
-            parameterFields.push(`${key}: ${type}${presence === 'required' ? ' - required' : ''}`);
+            if (validator instanceof Array) {
+                const stringifiedParameters = _.compact(validator.map(aValidator => this.constructor.parameterToString(aValidator)));
+                if (stringifiedParameters.length)
+                    parameterFields.push(`${key}: ${stringifiedParameters.join(' | ')}`);
+            }
+            else {
+                const stringifiedParameter = this.constructor.parameterToString(validator);
+                if (stringifiedParameter)
+                    parameterFields.push(`${key}: ${stringifiedParameter}`);
+            }
         });
         return parameterFields.join(', ');
     }
     get parameters() {
         const parameters = {};
         Controller_1.Controller.filter(this.Controller.inheritedParameters, this.action).forEach(([[key, validator], options]) => {
-            parameters[key] = validator.describe();
+            if (validator instanceof Array) {
+                // @ts-ignore
+                parameters[key] = validator.map(aValidator => aValidator.describe());
+            }
+            else {
+                parameters[key] = validator.describe();
+            }
         });
         return parameters;
     }
