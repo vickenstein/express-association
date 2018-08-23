@@ -58,5 +58,13 @@ describe('UserPurchase', () => {
         status: 422
       })
     })
+    it('catches an uncaught error', async () => {
+      const response = await request.get('/test/users/1337/user_purchases/1337/uncaught_error')
+      expect(response.body).to.deep.equal({
+        type: 'UncaughtError',
+        message: 'There was an error',
+        status: 500
+      })
+    })
   })
 })

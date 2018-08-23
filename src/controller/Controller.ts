@@ -3,6 +3,7 @@ import * as express from 'express'
 import * as _ from 'lodash'
 import { ApplicationError } from './ApplicationError'
 import { ParameterValidationError } from './ParameterValidationError'
+import { UncaughtError } from './UncaughtError'
 declare module 'express' {
 
   export interface Request {
@@ -148,7 +149,11 @@ export class Controller {
 
   static generateErrorHandlerMiddleware(errors: any[]) {
     return (error: any, request: express.Request, response: express.Response, next: express.NextFunction) => {
-      if (_.includes(errors, error.constructor)) return request.controller.errorHandler(error)
+      if (_.includes(errors, error.constructor)) {
+        return request.controller.errorHandler(error)
+      } else {
+        return request.controller.errorHandler(new UncaughtError(undefined, undefined, error.stack))
+      }
       next(error)
     }
   }

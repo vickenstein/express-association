@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Joi = require("joi");
 const _ = require("lodash");
 const ParameterValidationError_1 = require("./ParameterValidationError");
+const UncaughtError_1 = require("./UncaughtError");
 class Controller {
     constructor(request, response) {
         this.request = request;
@@ -107,8 +108,12 @@ class Controller {
     }
     static generateErrorHandlerMiddleware(errors) {
         return (error, request, response, next) => {
-            if (_.includes(errors, error.constructor))
+            if (_.includes(errors, error.constructor)) {
                 return request.controller.errorHandler(error);
+            }
+            else {
+                return request.controller.errorHandler(new UncaughtError_1.UncaughtError(undefined, undefined, error.stack));
+            }
             next(error);
         };
     }

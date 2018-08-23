@@ -20,6 +20,10 @@ class UserPurchase extends ApiController {
     throw new ResourceNotFoundError
   }
 
+  uncaughtError() {
+    throw new Error
+  }
+
   async asyncError() {
     throw new ResourceNotFoundError
   }

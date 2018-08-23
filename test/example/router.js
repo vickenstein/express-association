@@ -25,6 +25,7 @@ module.exports = new Router(router => {
       resource.member.get('not_fine', { action: 'notFine' })
       resource.member.get('error')
       resource.member.get('async_error', { action: 'asyncError' })
+      resource.member.get('uncaught_error', { action: 'uncaughtError' })
 
     })
   })
