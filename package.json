@@ -1,6 +1,6 @@
 {
   "name": "express-association",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "A controller plugin designed to utilize mongoose with the mongoose-associations plugin",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -40,6 +40,6 @@
     "inflection": "^1.12.0",
     "joi": "^13.6.0",
     "lodash": "^4.17.10",
-    "node-association": "0.0.6"
+    "node-association": "0.0.9"
   }
 }
