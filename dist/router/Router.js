@@ -168,16 +168,16 @@ class Router {
     get toJson() {
         const actions = [];
         this.forEachAction(action => {
-            const { url, as, errorStatuses, parameterFields } = action;
-            actions.push({ url, as, errorStatuses, parameterFields });
+            const { protocol, url, as, errorStatuses, parameterFields } = action;
+            actions.push({ protocol, url, as, errorStatuses, parameterFields });
         });
         return actions;
     }
     get doc() {
         const actions = [];
         this.forEachAction(action => {
-            const { url, as, errors, parameters } = action;
-            actions.push({ url, as, errors, parameters });
+            const { protocol, url, as, errors, parameters } = action;
+            actions.push({ protocol, url, as, errors, parameters });
         });
         return actions;
     }
