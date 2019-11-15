@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const _ = require("lodash");
 const ParameterValidationError_1 = require("./ParameterValidationError");
 const UncaughtError_1 = require("./UncaughtError");

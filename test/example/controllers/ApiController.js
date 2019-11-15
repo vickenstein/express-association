@@ -1,4 +1,4 @@
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 const { Controller } = require('../../../dist/index')
 const RandomError = require('../errors/RandomError')
 

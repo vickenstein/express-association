@@ -1,4 +1,4 @@
-import * as Joi from 'joi'
+import * as Joi from '@hapi/joi'
 import * as express from 'express'
 import * as _ from 'lodash'
 import { ApplicationError } from './ApplicationError'
